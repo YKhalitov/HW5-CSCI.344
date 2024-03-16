@@ -1588,10 +1588,49 @@ fun typeof (e, globals, functions, formals) =
           end
 
       (* function [[ty]], checks type of expression given $\itenvs$ ((prototype)) 348 *)
-      | ty (AMAKE (len, init)) = raise LeftAsExercise "AMAKE"
-      | ty (ASIZE a) = raise LeftAsExercise "ASIZE"
-      | ty (AAT (a, i)) = raise LeftAsExercise "AAT"
-      | ty (APUT (a, i, e)) = raise LeftAsExercise "APUT"
+      | ty (AMAKE (len, init)) = 
+        let
+
+      | ty (ASIZE a) = 
+        let
+          val tau_a = ty a
+        in
+          if eqType(tau_a, ARRAYTY tau_a) then
+            INTTY
+          else
+            raise TypeError("Ya messed up")
+        end
+      | ty (AAT (a, i)) = 
+        let
+          val arrayType = ty a
+          val indexType = ty i
+        in
+          if eqType (indexType, INTTY) then
+            case arrayType of
+              ARRAYTY array => arrayType
+            | _ => raise TypeError("Didn't pass in an array")
+          else
+            raise TypeError("Index must be an int")
+        end
+      | ty (APUT (a, i, e)) = 
+        let
+          val arrayType = ty a
+          val indexType = ty i
+          val insertType = ty e
+
+        in
+
+          if eqType (indexType, INTTY) then
+            case arrayType of
+              ARRAYTY array => 
+                case array of
+                  INTTY => if eqType (insertType, INTTY) insertType else raise TypeError ("Wrong insert int")
+                | BOOLTY => if eqType (insertType, BOOLTY) insertType else raise TypeError ("Wrong insert bool")
+                | UNITTY => if eqType (insertType, UNITTY) insertType else raise TypeError ("Wrong insert unit")
+            | _ => raise TypeError("Didn't pass in an array")
+          else
+            raise TypeError("Index must be an int")
+        end
 
     (* type declarations for consistency checking *)
     val _ = op ty : exp -> ty

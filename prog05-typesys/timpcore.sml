@@ -1596,6 +1596,7 @@ fun typeof (e, globals, functions, formals) =
           if eqType(lenType, INTTY) then
               (*Good because init can be anything*)
               (* What does this return? A list of type whatever init is?*)
+              ARRAYTY initType
           else
             raise TypeError("lenth parameter expected argument of type int,"
               ^"but got "^typeString lenType)
@@ -1604,10 +1605,9 @@ fun typeof (e, globals, functions, formals) =
         let
           val aType = ty a
         in
-          if eqType(aType, ARRAYTY) then
-            INTTY
-          else
-            raise TypeError("In array-size, expected argument of type array,"
+          case aType of 
+            ARRAYTY _ => INTTY
+          | _ =>  raise TypeError("In array-size, expected argument of type array,"
             ^"but got "^ typeString tau_a)
         end
 
@@ -1618,7 +1618,7 @@ fun typeof (e, globals, functions, formals) =
         in
           if eqType (indexType, INTTY) then
             case arrayType of
-              ARRAYTY array => arrayType
+              ARRAYTY elemType => elemType
             | _ => raise TypeError("Didn't pass in an array")
           else
             raise TypeError("Index must be an int")
@@ -1634,11 +1634,7 @@ fun typeof (e, globals, functions, formals) =
 
           if eqType (indexType, INTTY) then
             case arrayType of
-              ARRAYTY array => 
-                case array of
-                  INTTY => if eqType (insertType, INTTY) insertType else raise TypeError ("Wrong insert int")
-                | BOOLTY => if eqType (insertType, BOOLTY) insertType else raise TypeError ("Wrong insert bool")
-                | UNITTY => if eqType (insertType, UNITTY) insertType else raise TypeError ("Wrong insert unit")
+              ARRAYTY elemTy => if eqType (insertType, elemTy) then insertType else raise TypeError ("Wrong insert")
             | _ => raise TypeError("Didn't pass in an array")
           else
             raise TypeError("Index must be an int")

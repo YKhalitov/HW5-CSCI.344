@@ -1590,16 +1590,27 @@ fun typeof (e, globals, functions, formals) =
       (* function [[ty]], checks type of expression given $\itenvs$ ((prototype)) 348 *)
       | ty (AMAKE (len, init)) = 
         let
+          val lenType = ty len
+          val initType = ty init
+        in 
+          if eqType(lenType, INTTY) then
+              (*Good because init can be anything*)
+              (* What does this return? A list of type whatever init is?*)
+          else
+            raise TypeError("lenth parameter expected argument of type int,"
+              ^"but got "^typeString lenType)
 
       | ty (ASIZE a) = 
         let
-          val tau_a = ty a
+          val aType = ty a
         in
-          if eqType(tau_a, ARRAYTY tau_a) then
+          if eqType(aType, ARRAYTY) then
             INTTY
           else
-            raise TypeError("Ya messed up")
+            raise TypeError("In array-size, expected argument of type array,"
+            ^"but got "^ typeString tau_a)
         end
+
       | ty (AAT (a, i)) = 
         let
           val arrayType = ty a
@@ -1612,6 +1623,7 @@ fun typeof (e, globals, functions, formals) =
           else
             raise TypeError("Index must be an int")
         end
+
       | ty (APUT (a, i, e)) = 
         let
           val arrayType = ty a

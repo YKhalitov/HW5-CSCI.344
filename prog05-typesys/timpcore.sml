@@ -1600,7 +1600,7 @@ fun typeof (e, globals, functions, formals) =
           else
             raise TypeError("lenth parameter expected argument of type int,"
               ^"but got "^typeString lenType)
-
+        end
       | ty (ASIZE a) = 
         let
           val aType = ty a
@@ -1608,7 +1608,7 @@ fun typeof (e, globals, functions, formals) =
           case aType of 
             ARRAYTY _ => INTTY
           | _ =>  raise TypeError("In array-size, expected argument of type array,"
-            ^"but got "^ typeString tau_a)
+            ^"but got "^ typeString aType)
         end
 
       | ty (AAT (a, i)) = 
@@ -1618,10 +1618,10 @@ fun typeof (e, globals, functions, formals) =
         in
           if eqType (indexType, INTTY) then
             case arrayType of
-              ARRAYTY elemType => elemType
+              ARRAYTY elemTy => elemTy
             | _ => raise TypeError("Didn't pass in an array")
           else
-            raise TypeError("Index must be an int")
+            raise TypeError("Index must be an integer")
         end
 
       | ty (APUT (a, i, e)) = 
@@ -1629,17 +1629,14 @@ fun typeof (e, globals, functions, formals) =
           val arrayType = ty a
           val indexType = ty i
           val insertType = ty e
-
         in
-
           if eqType (indexType, INTTY) then
             case arrayType of
-              ARRAYTY elemTy => if eqType (insertType, elemTy) then insertType else raise TypeError ("Wrong insert")
+              ARRAYTY elemTy => if eqType(insertType, elemTy) then insertType else raise TypeError ("Insert has wrong type")
             | _ => raise TypeError("Didn't pass in an array")
           else
-            raise TypeError("Index must be an int")
+            raise TypeError("Index must be an integer")
         end
-
     (* type declarations for consistency checking *)
     val _ = op ty : exp -> ty
   in

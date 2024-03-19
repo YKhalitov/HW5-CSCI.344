@@ -1844,7 +1844,7 @@ val _ = op eqTypes : tyex list * tyex list -> bool
 (* type checking for {\tuscheme} ((prototype)) 366 *)
 fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
   let
-    fun ty (LITERAL (NUM n)) = raise LeftAsExercise "LITERAL/NUM"
+    fun ty (LITERAL (NUM n)) = inttype
       | ty (LITERAL (BOOLV b)) = raise LeftAsExercise "LITERAL/BOOL"
       | ty (LITERAL (SYM s)) = raise LeftAsExercise "LITERAL/SYM"
       | ty (LITERAL NIL) = raise LeftAsExercise "LITERAL/NIL"

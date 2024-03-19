@@ -1845,10 +1845,10 @@ val _ = op eqTypes : tyex list * tyex list -> bool
 fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
   let
     fun ty (LITERAL (NUM n)) = inttype
-      | ty (LITERAL (BOOLV b)) = raise LeftAsExercise "LITERAL/BOOL"
-      | ty (LITERAL (SYM s)) = raise LeftAsExercise "LITERAL/SYM"
+      | ty (LITERAL (BOOLV b)) = booltype
+      | ty (LITERAL (SYM s)) = symtype
       | ty (LITERAL NIL) = raise LeftAsExercise "LITERAL/NIL"
-      | ty (LITERAL (PAIR (h, t))) = raise LeftAsExercise "LITERAL/PAIR"
+      | ty (LITERAL (PAIR (h, t))) = pairtype(h, t)
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =

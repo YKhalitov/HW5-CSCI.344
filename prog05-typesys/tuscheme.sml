@@ -1847,15 +1847,33 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
     fun ty (LITERAL (NUM n)) = inttype
       | ty (LITERAL (BOOLV b)) = booltype
       | ty (LITERAL (SYM s)) = symtype
-      | ty (LITERAL NIL) = raise LeftAsExercise "LITERAL/NIL"
-      | ty (LITERAL (PAIR (h, t))) = pairtype(h, t)
+      | ty (LITERAL NIL) = raise LeftAsExercise "NIL"(* NIL might be wrong*)
+      | ty (LITERAL (PAIR (h, t))) = raise LeftAsExercise "PAIR"(*pairtype(h, t)*)
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =
           raise TypeError "impossible -- PRIMITIVE literal"
       | ty (VAR x) = raise LeftAsExercise "VAR"
       | ty (SET (x, e)) = raise LeftAsExercise "SET"
-      | ty (IFX (e1, e2, e3)) = raise LeftAsExercise "IFX"
+      | ty (IFX (e1, e2, e3)) = 
+        let 
+          val e1Type = ty e1
+          val e2Type = ty e2
+          val e3Type = ty e3
+        in
+          if eqType(e1Type, booltype) then
+            if eqType(e2Type, e3Type) then
+              e2Type
+            else 
+              raise TypeError
+                ("In if expression, true branch has type " ^ typeString e2Type
+                  ^ " but false branch has type " ^ typeString e3Type)
+          else 
+            raise TypeError
+              ("In if expression, true branch has type " ^ typeString e2Type
+                ^ " but false branch has type " ^ typeString e3Type)
+          end
+
       | ty (WHILEX (e1, e2)) = raise LeftAsExercise "WHILE"
       | ty (BEGIN es) = raise LeftAsExercise "BEGIN"
       | ty (LETX (LET, bs, body)) = raise LeftAsExercise "LETX/LET"

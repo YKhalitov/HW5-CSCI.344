@@ -1901,7 +1901,14 @@ fun ty (LITERAL (NUM n)) = inttype
           let val bodytypes = map ty es
           in List.last bodytypes handle Empty => unittype 
           end
-      | ty (LETX (LET, bs, body)) = raise LeftAsExercise "LETX/LET"
+      | ty (LETX (LET, bs, body)) = 
+          if not (isbound (bs, Gamma)) then
+            let val tau = typeof (bs, Delta, Gamma)
+            in (bind (bs, tau, Gamma))
+            end
+          else 
+            raise TypeError("Local Variable Already Exists")
+
       | ty (LETX (LETSTAR, bs, body)) = raise LeftAsExercise "LETX/LETSTAR"
       | ty (LETRECX (bs, body)) = raise LeftAsExercise "LETRECX"
       | ty (LAMBDA (formals, body)) = raise LeftAsExercise "LAMBDA"

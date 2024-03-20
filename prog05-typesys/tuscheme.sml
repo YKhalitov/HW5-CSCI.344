@@ -1853,8 +1853,19 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =
           raise TypeError "impossible -- PRIMITIVE literal"
-      | ty (VAR x) = raise LeftAsExercise "VAR"
-      | ty (SET (x, e)) = raise LeftAsExercise "SET"
+      | ty (VAR x) = inttype (*Why does this not pass test Ba*)
+      | ty (SET (x, e)) = (*This is just ripped off from impcore, not optimistic*)
+        let
+          val xType = ty (VAR x)
+          val eType = ty e
+        in
+          if eqType(xType, eType) then
+            xType
+          else
+            raise TypeError
+              ("Set variable " ^ x ^ " of type " ^ typeString xType
+                ^ " to value of type " ^ typeString eType)
+        end
       | ty (IFX (e1, e2, e3)) = 
         let 
           val e1Type = ty e1

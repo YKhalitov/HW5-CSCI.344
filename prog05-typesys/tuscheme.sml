@@ -1885,7 +1885,18 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
                 ^ " but false branch has type " ^ typeString e3Type)
           end
 
-      | ty (WHILEX (e1, e2)) = raise LeftAsExercise "WHILE"
+      | ty (WHILEX (e1, e2)) = 
+        let
+          val e1Type = ty e1
+          val e2Type = ty e2 (*possily need to pattern match into what type of value, exp instead of ty. Since ty was impcore datatype*)
+        in
+          if eqType (e1Type, booltype) then
+            e2Type
+          else
+            raise TypeError
+              ("Condition in while expression has type " ^ typeString e1Type
+                ^ ", which should be " ^ typeString booltype)
+        end
       | ty (BEGIN es) = raise LeftAsExercise "BEGIN"
       | ty (LETX (LET, bs, body)) = raise LeftAsExercise "LETX/LET"
       | ty (LETX (LETSTAR, bs, body)) = raise LeftAsExercise "LETX/LETSTAR"
@@ -1904,7 +1915,24 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
 val _ = op typeof : exp * kind env * tyex env -> tyex
 fun typdef (d: def, Delta: kind env, Gamma: tyex env) : tyex env * string =
   case d of
-    VAL (name, e) => raise LeftAsExercise "VAL"
+    VAL (name, e) => 
+      if not (isbound (name, Delta)) then
+        let val tau = typeof (e, Delta, Gamma)
+        in (bind (name, tau, Gamma), typeString tau)
+        end
+      else
+        let
+          val tau' = find (name, Gamma)
+          val tau = typeof (e, Delta, Gamma)
+        in
+          if eqType (tau, tau') then
+            (Gamma, typeString tau)
+          else
+
+            (* raise [[TypeError]] with message about redefinition 342a *)
+            raise TypeError
+              ("You messed up redefining")
+        end
   | EXP e => typdef (VAL ("it", e), Delta, Gamma)
   | DEFINE (name, tau, lambda as (formals, body)) =>
       raise LeftAsExercise "DEFINE"

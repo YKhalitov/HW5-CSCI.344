@@ -1844,17 +1844,17 @@ val _ = op eqTypes : tyex list * tyex list -> bool
 (* type checking for {\tuscheme} ((prototype)) 366 *)
 fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
   let
-        fun ty (LITERAL (NUM n)) = inttype
+    fun ty (LITERAL (NUM n)) = inttype
       | ty (LITERAL (BOOLV b)) = booltype
       | ty (LITERAL (SYM s)) = symtype
-      | ty (LITERAL NIL) = raise LeftAsExercise "NIL"(* NIL might be wrong*)
-      | ty (LITERAL (PAIR (h, t))) = raise LeftAsExercise "PAIR"(*pairtype(h, t)*)
+      | ty (LITERAL NIL) = raise LeftAsExercise "NIL"(* According to Typing rules this becomes a list of type a?*)
+      | ty (LITERAL (PAIR (h, t))) = raise LeftAsExercise "PAIR" (*According to type rules. If t NIL return type of h. If t is a list return as type of t*)
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =
           raise TypeError "impossible -- PRIMITIVE literal"
-      | ty (VAR x) = inttype (*Why does this not pass test Ba*)
-      | ty (SET (x, e)) = (*This is just ripped off from impcore, not optimistic*)
+      | ty (VAR x) = (find (x, Gamma) handle NotFound _ => raise TypeError("wrong"))
+      | ty (SET (x, e)) = 
         let
           val xType = ty (VAR x)
           val eType = ty e
@@ -1868,9 +1868,9 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
         end
       | ty (IFX (e1, e2, e3)) = 
         let 
-          val e1Type = ty e1
-          val e2Type = ty e2
-          val e3Type = ty e3
+          val e1Type = ty e1  (*Bool*)
+          val e2Type = ty e2 (*Can return anything*)
+          val e3Type = ty e3 (*Can return anything*)
         in
           if eqType(e1Type, booltype) then
             if eqType(e2Type, e3Type) then
@@ -1891,13 +1891,16 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           val e2Type = ty e2 (*possily need to pattern match into what type of value, exp instead of ty. Since ty was impcore datatype*)
         in
           if eqType (e1Type, booltype) then
-            e2Type
+            unittype
           else
             raise TypeError
               ("Condition in while expression has type " ^ typeString e1Type
                 ^ ", which should be " ^ typeString booltype)
         end
-      | ty (BEGIN es) = raise LeftAsExercise "BEGIN"
+      | ty (BEGIN es) = 
+        let val bodytypes = map ty es
+        in List.last bodytypes handle Empty => unittype
+        end
       | ty (LETX (LET, bs, body)) = raise LeftAsExercise "LETX/LET"
       | ty (LETX (LETSTAR, bs, body)) = raise LeftAsExercise "LETX/LETSTAR"
       | ty (LETRECX (bs, body)) = raise LeftAsExercise "LETRECX"

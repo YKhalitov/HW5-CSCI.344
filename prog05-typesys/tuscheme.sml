@@ -1905,7 +1905,7 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
             val (xs, es) = ListPair.unzip (bs)
             val eTys = map ty es
             val GammaModified = bindList (xs, eTys, Gamma)
-            val eTy = typeof (e, Delta, GammaModified)
+            val eTy = typeof (body, Delta, GammaModified)
           in
             eTy
           end

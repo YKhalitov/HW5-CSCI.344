@@ -1854,7 +1854,7 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       | ty (LITERAL (PRIMITIVE _)) =
           raise TypeError "impossible -- PRIMITIVE literal"
       | ty (VAR x) = (find (x, Gamma) handle NotFound _ => raise TypeError("wrong"))
-      | ty (SET (x, e)) = (*Basically just ripped off from impcore, not optimistic*)
+      | ty (SET (x, e)) = 
         let
           val xType = ty (VAR x)
           val eType = ty e
@@ -1897,7 +1897,10 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
               ("Condition in while expression has type " ^ typeString e1Type
                 ^ ", which should be " ^ typeString booltype)
         end
-      | ty (BEGIN es) = raise LeftAsExercise "BEGIN"
+      | ty (BEGIN es) = 
+        let val bodytypes = map ty es
+        in List.last bodytypes handle Empty => unittype
+        end
       | ty (LETX (LET, bs, body)) = raise LeftAsExercise "LETX/LET"
       | ty (LETX (LETSTAR, bs, body)) = raise LeftAsExercise "LETX/LETSTAR"
       | ty (LETRECX (bs, body)) = raise LeftAsExercise "LETRECX"

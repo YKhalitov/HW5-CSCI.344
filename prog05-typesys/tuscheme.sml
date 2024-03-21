@@ -1855,53 +1855,60 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           raise TypeError "impossible -- PRIMITIVE literal"
       | ty (VAR x) = (find (x, Gamma) handle NotFound _ => raise TypeError("wrong"))
       | ty (SET (x, e)) = 
-        let
-          val xType = ty (VAR x)
-          val eType = ty e
-        in
-          if eqType(xType, eType) then
-            xType
-          else
-            raise TypeError
-              ("Set variable " ^ x ^ " of type " ^ typeString xType
-                ^ " to value of type " ^ typeString eType)
-        end
+          let
+            val xType = ty (VAR x)
+            val eType = ty e
+          in
+            if eqType(xType, eType) then
+              xType
+            else
+              raise TypeError
+                ("Set variable " ^ x ^ " of type " ^ typeString xType
+                  ^ " to value of type " ^ typeString eType)
+          end
       | ty (IFX (e1, e2, e3)) = 
-        let 
-          val e1Type = ty e1  (*Bool*)
-          val e2Type = ty e2 (*Can return anything*)
-          val e3Type = ty e3 (*Can return anything*)
-        in
-          if eqType(e1Type, booltype) then
-            if eqType(e2Type, e3Type) then
-              e2Type
+          let 
+            val e1Type = ty e1  (*Bool*)
+            val e2Type = ty e2 (*Can return anything*)
+            val e3Type = ty e3 (*Can return anything*)
+          in
+            if eqType(e1Type, booltype) then
+              if eqType(e2Type, e3Type) then
+                e2Type
+              else 
+                raise TypeError
+                  ("In if expression, true branch has type " ^ typeString e2Type
+                    ^ " but false branch has type " ^ typeString e3Type)
             else 
               raise TypeError
                 ("In if expression, true branch has type " ^ typeString e2Type
                   ^ " but false branch has type " ^ typeString e3Type)
-          else 
-            raise TypeError
-              ("In if expression, true branch has type " ^ typeString e2Type
-                ^ " but false branch has type " ^ typeString e3Type)
           end
-
       | ty (WHILEX (e1, e2)) = 
-        let
-          val e1Type = ty e1
-          val e2Type = ty e2 (*possily need to pattern match into what type of value, exp instead of ty. Since ty was impcore datatype*)
-        in
-          if eqType (e1Type, booltype) then
-            unittype
-          else
-            raise TypeError
-              ("Condition in while expression has type " ^ typeString e1Type
-                ^ ", which should be " ^ typeString booltype)
-        end
+          let
+            val e1Type = ty e1
+            val e2Type = ty e2 
+          in
+            if eqType (e1Type, booltype) then
+              unittype
+            else
+              raise TypeError
+                ("Condition in while expression has type " ^ typeString e1Type
+                  ^ ", which should be " ^ typeString booltype)
+          end
       | ty (BEGIN es) = 
-        let val bodytypes = map ty es
-        in List.last bodytypes handle Empty => unittype
-        end
-      | ty (LETX (LET, bs, body)) = raise LeftAsExercise "LETX/LET"
+          let val bodytypes = map ty es
+          in List.last bodytypes handle Empty => unittype
+          end
+      | ty (LETX (LET, bs, body)) = 
+          let
+            val (xs, es) = ListPair.unzip (bs)
+            val eTys = map ty es
+            val GammaModified = bindList (xs, eTys, Gamma)
+            val eTy = typeof (e, Delta, GammaModified)
+          in
+            eTy
+          end
       | ty (LETX (LETSTAR, bs, body)) = raise LeftAsExercise "LETX/LETSTAR"
       | ty (LETRECX (bs, body)) = raise LeftAsExercise "LETRECX"
       | ty (LAMBDA (formals, body)) = raise LeftAsExercise "LAMBDA"
@@ -1919,22 +1926,8 @@ val _ = op typeof : exp * kind env * tyex env -> tyex
 fun typdef (d: def, Delta: kind env, Gamma: tyex env) : tyex env * string =
   case d of
     VAL (name, e) => 
-      if not (isbound (name, Delta)) then
         let val tau = typeof (e, Delta, Gamma)
         in (bind (name, tau, Gamma), typeString tau)
-        end
-      else
-        let
-          val tau' = find (name, Gamma)
-          val tau = typeof (e, Delta, Gamma)
-        in
-          if eqType (tau, tau') then
-            (Gamma, typeString tau)
-          else
-
-            (* raise [[TypeError]] with message about redefinition 342a *)
-            raise TypeError
-              ("You messed up redefining")
         end
   | EXP e => typdef (VAL ("it", e), Delta, Gamma)
   | DEFINE (name, tau, lambda as (formals, body)) =>

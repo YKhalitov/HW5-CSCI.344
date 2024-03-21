@@ -1853,7 +1853,7 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =
           raise TypeError "impossible -- PRIMITIVE literal"
-      | ty (VAR x) = (find (x, Gamma))
+      | ty (VAR x) = (find (x, Gamma) handle NotFound _ => raise TypeError("wrong"))
       | ty (SET (x, e)) = (*Basically just ripped off from impcore, not optimistic*)
         let
           val xType = (find (x, Gamma))

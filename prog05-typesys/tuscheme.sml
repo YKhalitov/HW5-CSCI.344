@@ -1856,7 +1856,7 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       | ty (VAR x) = (find (x, Gamma) handle NotFound _ => raise TypeError("wrong"))
       | ty (SET (x, e)) = (*Basically just ripped off from impcore, not optimistic*)
         let
-          val xType = (find (x, Gamma))
+          val xType = ty (VAR x)
           val eType = ty e
         in
           if eqType(xType, eType) then

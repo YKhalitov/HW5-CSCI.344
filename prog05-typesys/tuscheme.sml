@@ -1891,10 +1891,7 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           val e2Type = ty e2 (*possily need to pattern match into what type of value, exp instead of ty. Since ty was impcore datatype*)
         in
           if eqType (e1Type, booltype) then
-            if eqType (e2Type, unittype)then 
-              e2Type 
-            else
-              raise TypeError("Expected unittype return")
+            unittype
           else
             raise TypeError
               ("Condition in while expression has type " ^ typeString e1Type

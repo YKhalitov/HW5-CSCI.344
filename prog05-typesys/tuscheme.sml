@@ -1920,10 +1920,19 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           (*I think the only check is if constructor Ti has kind *, whatever that means*)
           (*I dont really understand the difference between Ti and Tn*)
           (* kindof(formalTys ,Delta)?*)
-          raise LeftAsExercise "LAMBDA"
+          FUNTY (formalTys, eTy)
           (*Return a new kind where it is formalTys -> eTy*)
         end
-      | ty (APPLY (f, actuals)) = raise LeftAsExercise "APPLY"
+      | ty (APPLY (f, actuals)) = 
+        let
+          val actualtypes = map ty actuals
+          (* val FUNTY (formaltypes, resulttype) = kindof(f, Delta) *)
+        in
+          (*if eqTypes (actualtypes, formaltypes) then resulttype
+          else raise TypeError ("Actual Types does not = formal types")*)
+          raise LeftAsExercise ("APPLY")
+        end
+
       | ty (TYLAMBDA (alphas, e)) = raise LeftAsExercise "TYLAMBDA"
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"
 

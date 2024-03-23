@@ -1911,7 +1911,18 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           end
       | ty (LETX (LETSTAR, bs, body)) = raise LeftAsExercise "LETX/LETSTAR"
       | ty (LETRECX (bs, body)) = raise LeftAsExercise "LETRECX"
-      | ty (LAMBDA (formals, body)) = raise LeftAsExercise "LAMBDA"
+      | ty (LAMBDA (formals, body)) = 
+        let
+          val (formalNames, formalTys) = ListPair.unzip (formals)
+          val GammaModified = bindList (formalNames, formalTys, Gamma)
+          val eTy = typeof (body, Delta, GammaModified)
+        in
+          (*I think the only check is if constructor Ti has kind *, whatever that means*)
+          (*I dont really understand the difference between Ti and Tn*)
+          (* kindof(formalTys ,Delta)?*)
+          raise LeftAsExercise "LAMBDA"
+          (*Return a new kind where it is formalTys -> eTy*)
+        end
       | ty (APPLY (f, actuals)) = raise LeftAsExercise "APPLY"
       | ty (TYLAMBDA (alphas, e)) = raise LeftAsExercise "TYLAMBDA"
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"

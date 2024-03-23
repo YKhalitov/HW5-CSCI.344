@@ -1847,8 +1847,18 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
     fun ty (LITERAL (NUM n)) = inttype
       | ty (LITERAL (BOOLV b)) = booltype
       | ty (LITERAL (SYM s)) = symtype
-      | ty (LITERAL NIL) = raise LeftAsExercise "NIL"(* According to Typing rules this becomes a list of type a?*)
-      | ty (LITERAL (PAIR (h, t))) = raise LeftAsExercise "PAIR" (*According to type rules. If t NIL return type of h. If t is a list return as type of t*)
+      | ty (LITERAL NIL) = 
+        (* do not know how to make an empty list of any type*)
+        raise LeftAsExercise "NIL"
+      | ty (LITERAL (PAIR (h, t))) = 
+        let
+          val headTy = ty h
+          val tailTy = ty t
+        in
+          (*Head type must match the list type of the tail*)
+          raise LeftAsExercise "PAIR"
+        end
+      
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =

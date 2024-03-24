@@ -1915,7 +1915,14 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           in
             eTy
           end
-      | ty (LETX (LETSTAR, bs, body)) = raise LeftAsExercise "LETX/LETSTAR"
+      | ty (LETX (LETSTAR, bs, body)) = 
+          let
+            val (xs, es) = ListPair.unzip (bs)
+            val eTys = map ty es
+            val GammaModified = bindList (xs, eTys, Gamma)
+          in
+            typeof (LETX (LET, bs, body), Delta, GammaModified)
+          end
       | ty (LETRECX (bs, body)) = raise LeftAsExercise "LETRECX"
       | ty (LAMBDA (formals, body)) = 
         let

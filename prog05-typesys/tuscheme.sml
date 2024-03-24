@@ -1893,7 +1893,7 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       | ty (WHILEX (e1, e2)) = 
           let
             val e1Type = ty e1
-            val e2Type = ty e2 
+            val e2Type = ty e2
           in
             if eqType (e1Type, booltype) then
               unittype
@@ -1932,18 +1932,22 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
         in
           (*I think the only check is if constructor Ti has kind *, whatever that means*)
           (*I dont really understand the difference between Ti and Tn*)
-          (* kindof(formalTys ,Delta)?*)
+          (* kindof(formalTys, Delta) *)
           FUNTY (formalTys, eTy)
           (*Return a new kind where it is formalTys -> eTy*)
         end
       | ty (APPLY (f, actuals)) = 
         let
-          val actualtypes = map ty actuals
-          (* val FUNTY (formaltypes, resulttype) = kindof(f, Delta) *)
+          val functionType = ty f
+          val actualTypes = map ty actuals 
         in
-          (*if eqTypes (actualtypes, formaltypes) then resulttype
-          else raise TypeError ("Actual Types does not = formal types")*)
-          raise LeftAsExercise ("APPLY")
+          case functionType of
+            FUNTY(argTypes, resultType) => 
+              if eqTypes(argTypes, actualTypes) then
+                resultType
+              else
+                raise TypeError "Something don't add up"
+          | _ => raise TypeError "Function isn't an actual function or maybe not well typed"
         end
 
       | ty (TYLAMBDA (alphas, e)) = raise LeftAsExercise "TYLAMBDA"

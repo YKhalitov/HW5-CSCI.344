@@ -1851,13 +1851,9 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
         (* do not know how to make an empty list of any type*)
         raise LeftAsExercise "NIL"
       | ty (LITERAL (PAIR (h, t))) = 
-        let
-          val headTy = ty h
-          val tailTy = ty t
-        in
           (*Head type must match the list type of the tail*)
           raise LeftAsExercise "PAIR"
-        end
+
       
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"

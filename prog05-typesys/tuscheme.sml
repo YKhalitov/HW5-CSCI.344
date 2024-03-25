@@ -1852,7 +1852,15 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
         raise LeftAsExercise "NIL"
       | ty (LITERAL (PAIR (h, t))) = 
           (*Head type must match the list type of the tail*)
-          raise LeftAsExercise "PAIR"
+          let 
+            val hType = ty (LITERAL h)
+            val tType = ty (LITERAL t)
+          in
+            (*Need to implement NIL first
+            listtype hType
+            *)
+            raise LeftAsExercise "PAIR"
+          end
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =
@@ -1931,6 +1939,8 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           (*I think the only check is if constructor Ti has kind *, whatever that means*)
           (*I dont really understand the difference between Ti and Tn*)
           (* kindof(formalTys, Delta) *)
+
+          (*Maybe Kind FORALL (alphas, tau)) *)
 
           (* case kindof (formalTys, Delta) of
             TYCON c =>

@@ -1849,12 +1849,19 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       | ty (LITERAL (SYM s)) = symtype
       | ty (LITERAL NIL) = 
         (* do not know how to make an empty list of any type*)
-        raise LeftAsExercise "NIL"
+        (*For all types a, return an empty list of type a*)
+        FORALL (["'a"], listtype tvA)
       | ty (LITERAL (PAIR (h, t))) = 
           (*Head type must match the list type of the tail*)
-          raise LeftAsExercise "PAIR"
-
-      
+          let 
+            val hType = ty (LITERAL h)
+            val tType = ty (LITERAL t)
+          in
+            (*Need to implement NIL first
+            listtype hType
+            *)
+            raise LeftAsExercise "PAIR"
+          end
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =
@@ -1932,11 +1939,6 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           val eTy = typeof (body, Delta, GammaModified)
         in 
           FUNTY (formalTys, eTy)
-          (*I think the only check is if constructor Ti has kind *, whatever that means*)
-          (*I dont really understand the difference between Ti and Tn*)
-          (* kindof(formalTys, Delta) *)
-          (* FUNTY (formalTys, eTy) *)
-          (*Return a new kind where it is formalTys -> eTy*)
         end
       | ty (APPLY (f, actuals)) = 
         let
@@ -1954,8 +1956,13 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
 
       | ty (TYLAMBDA (alphas, e)) = raise LeftAsExercise "TYLAMBDA"
       (* dont let any of the type variables we are writing down, exist, no dice. Otherwise throw into delta, recursively check, and put it back into. Adding into enviroment with kind star? *)
+      (* TYLAMBDA of name list * exp *)
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"
       (* special kind of substitution, instantiate (FORALL) *)
+      (* TYAPPLY of exp * tyex list *)
+      (*e has type for any given a...*)
+      (*Given Delta, Ti has kind * *)
+      (*TYAPPLY returns ... *)
 
     (* type declarations for consistency checking *)
     val _ = op ty : exp -> tyex

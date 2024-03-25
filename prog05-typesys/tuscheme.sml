@@ -1927,20 +1927,22 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       | ty (LAMBDA (formals, body)) = 
         let
           val (formalNames, formalTys) = ListPair.unzip (formals)
+          val formalTys = map (fn ty => asType(ty, Delta)) formalTys
           val GammaModified = bindList (formalNames, formalTys, Gamma)
           val eTy = typeof (body, Delta, GammaModified)
-        in
+        in 
+          FUNTY (formalTys, eTy)
           (*I think the only check is if constructor Ti has kind *, whatever that means*)
           (*I dont really understand the difference between Ti and Tn*)
           (* kindof(formalTys, Delta) *)
-          FUNTY (formalTys, eTy)
+          (* FUNTY (formalTys, eTy) *)
           (*Return a new kind where it is formalTys -> eTy*)
         end
       | ty (APPLY (f, actuals)) = 
         let
           val functionType = ty f
           val actualTypes = map ty actuals 
-        in
+        in 
           case functionType of
             FUNTY(argTypes, resultType) => 
               if eqTypes(argTypes, actualTypes) then
@@ -1951,7 +1953,9 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
         end
 
       | ty (TYLAMBDA (alphas, e)) = raise LeftAsExercise "TYLAMBDA"
+      (* dont let any of the type variables we are writing down, exist, no dice. Otherwise throw into delta, recursively check, and put it back into. Adding into enviroment with kind star? *)
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"
+      (* special kind of substitution, instantiate (FORALL) *)
 
     (* type declarations for consistency checking *)
     val _ = op ty : exp -> tyex
@@ -1967,8 +1971,14 @@ fun typdef (d: def, Delta: kind env, Gamma: tyex env) : tyex env * string =
         in (bind (name, tau, Gamma), typeString tau)
         end
   | EXP e => typdef (VAL ("it", e), Delta, Gamma)
-  | DEFINE (name, tau, lambda as (formals, body)) =>
-      raise LeftAsExercise "DEFINE"
+  | DEFINE (name, tau, lambda as (formals, body)) => raise LeftAsExercise "DEFINE"
+      (* let
+        val (fnames, ftys) = ListPair.unzip formals
+        val def's_type = FUNTY (ftys, returns)
+        val functions' = bind (f, def's_type, functions)
+      in
+
+      end *)
   | VALREC (name, tau, e) => raise LeftAsExercise "VALREC"
 (* type declarations for consistency checking *)
 val _ = op typdef : def * kind env * tyex env -> tyex env * string

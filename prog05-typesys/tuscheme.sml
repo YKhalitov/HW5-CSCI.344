@@ -1978,15 +1978,22 @@ fun typdef (d: def, Delta: kind env, Gamma: tyex env) : tyex env * string =
         in (bind (name, tau, Gamma), typeString tau)
         end
   | EXP e => typdef (VAL ("it", e), Delta, Gamma)
-  | DEFINE (name, tau, lambda as (formals, body)) => raise LeftAsExercise "DEFINE"
-      (* let
-        val (fnames, ftys) = ListPair.unzip formals
-        val def's_type = FUNTY (ftys, returns)
-        val functions' = bind (f, def's_type, functions)
-      in
-
-      end *)
-  | VALREC (name, tau, e) => raise LeftAsExercise "VALREC"
+  | DEFINE (name, tau, lambda as (formals, body)) => 
+      typdef (VALREC (name, tau, LAMBDA (formals, body)), Delta, Gamma)
+  | VALREC (name, tau, e) =>  (* val eType = typeof (e, Delta, Gamma) val eType = asType(eType, Delta) val tau = typeof (e, Delta, Gamma) *)
+    let
+      val tau = asType(tau, Delta)
+      val GammaModified = bind (name, tau, Gamma)
+    in
+      case e of
+        LAMBDA(formals, body) => (GammaModified, typeString tau)
+          (* let
+            val (formalNames, formalTys) = ListPair.unzip (formals)
+          in
+            (GammaModified, typeString tau)
+          end *)
+      | _ => raise TypeError "E is not of form lambda"
+    end
 (* type declarations for consistency checking *)
 val _ = op typdef : def * kind env * tyex env -> tyex env * string
 

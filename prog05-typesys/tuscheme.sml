@@ -1980,7 +1980,7 @@ fun typdef (d: def, Delta: kind env, Gamma: tyex env) : tyex env * string =
         end
   | EXP e => typdef (VAL ("it", e), Delta, Gamma)
   | DEFINE (name, tau, lambda as (formals, body)) => 
-      typdef (VALREC (name, tau, LAMBDA (formals, body)), Delta, Gamma)
+      typdef (VALREC (name, FUNTY(), LAMBDA (formals, body)), Delta, Gamma)
   | VALREC (name, tau, e) =>  (* val eType = typeof (e, Delta, Gamma) val eType = asType(eType, Delta) val tau = typeof (e, Delta, Gamma) *)
     let
       val tau = asType(tau, Delta)

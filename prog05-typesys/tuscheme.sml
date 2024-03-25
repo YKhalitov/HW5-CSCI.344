@@ -1857,10 +1857,11 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
             val hType = ty (LITERAL h)
             val tType = ty (LITERAL t)
           in
-            (*Need to implement NIL first
-            listtype hType
-            *)
-            raise LeftAsExercise "PAIR"
+            case (h, t) of
+              (_, NIL) => listtype hType
+            | (h, PAIR(h2, t2)) => if eqType(hType, ty (LITERAL h2)) then listtype hType else raise TypeError("Both elements in the pair need to be same type, not" ^ typeString hType^" and "^typeString tType)
+            | _ => listtype hType 
+              (* raise TypeError("Both elements in the pair need to be same type, not" ^ typeString hType^" and "^typeString tType) *)
           end
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"

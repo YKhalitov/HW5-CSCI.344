@@ -1849,7 +1849,8 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       | ty (LITERAL (SYM s)) = symtype
       | ty (LITERAL NIL) = 
         (* do not know how to make an empty list of any type*)
-        raise LeftAsExercise "NIL"
+        (*For all types a, return an empty list of type a*)
+        FORALL (["'a"], listtype tvA)
       | ty (LITERAL (PAIR (h, t))) = 
           (*Head type must match the list type of the tail*)
           let 
@@ -1935,13 +1936,10 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           val (formalNames, formalTys) = ListPair.unzip (formals)
           val GammaModified = bindList (formalNames, formalTys, Gamma)
           val eTy = typeof (body, Delta, GammaModified)
+          (* eqKind  kind is *, arrow is bad*)
         in
-          (*I think the only check is if constructor Ti has kind *, whatever that means*)
-          (*I dont really understand the difference between Ti and Tn*)
-          (* kindof(formalTys, Delta) *)
-
-          (*Maybe Kind FORALL (alphas, tau)) *)
-
+          
+          (*I think the only check is if constructor Ti has kind *)
           (* case kindof (formalTys, Delta) of
             TYCON c =>
               raise TypeError ("Can't use type constructor" ^ c ^ "here")
@@ -1967,6 +1965,9 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       (* TYLAMBDA of name list * exp *)
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"
       (* TYAPPLY of exp * tyex list *)
+      (*e has type for any given a...*)
+      (*Given Delta, Ti has kind * *)
+      (*TYAPPLY returns ... *)
 
     (* type declarations for consistency checking *)
     val _ = op ty : exp -> tyex

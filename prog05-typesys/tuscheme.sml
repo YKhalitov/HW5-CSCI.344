@@ -1853,8 +1853,6 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       | ty (LITERAL (PAIR (h, t))) = 
           (*Head type must match the list type of the tail*)
           raise LeftAsExercise "PAIR"
-
-      
       | ty (LITERAL (CLOSURE _)) =
           raise TypeError "impossible -- CLOSURE literal"
       | ty (LITERAL (PRIMITIVE _)) =
@@ -1933,8 +1931,13 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           (*I think the only check is if constructor Ti has kind *, whatever that means*)
           (*I dont really understand the difference between Ti and Tn*)
           (* kindof(formalTys, Delta) *)
+
+          (* case kindof (formalTys, Delta) of
+            TYCON c =>
+              raise TypeError ("Can't use type constructor" ^ c ^ "here")
+          | _ => FUNTY (formalTys, eTy) *)
+
           FUNTY (formalTys, eTy)
-          (*Return a new kind where it is formalTys -> eTy*)
         end
       | ty (APPLY (f, actuals)) = 
         let
@@ -1951,7 +1954,9 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
         end
 
       | ty (TYLAMBDA (alphas, e)) = raise LeftAsExercise "TYLAMBDA"
+      (* TYLAMBDA of name list * exp *)
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"
+      (* TYAPPLY of exp * tyex list *)
 
     (* type declarations for consistency checking *)
     val _ = op ty : exp -> tyex

@@ -1963,9 +1963,25 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           | _ => raise TypeError "Function isn't an actual function or maybe not well typed"
         end
 
-      | ty (TYLAMBDA (alphas, e)) = raise LeftAsExercise "TYLAMBDA"
+      | ty (TYLAMBDA (alphas, e)) =
       (* dont let any of the type variables we are writing down, exist, no dice. Otherwise throw into delta, recursively check, and put it back into. Adding into enviroment with kind star? *)
       (* TYLAMBDA of name list * exp *)
+        let
+          val freeVars = freetyvarsGamma Gamma 
+          (* Create a list of size alphas where its all TYPE *)
+          (* val listOfKind = List.tabulate(length alphas, fn _ => TYPE)
+          val DeltaModified = bindList (alphas, listOfKind, Gamma) *)
+
+          (* val eTy = typeof (body, DeltaModified, Gamma) *)
+(* List.exists (fn freevar => List.exists (fn alpha => freevar = alpha) alphas) freeVars *)
+        in
+          if (List.exists (fn freevar => List.exists (fn alpha => freevar = alpha) alphas) freeVars) then 
+            raise TypeError "Umm it exists" 
+          else 
+            (* This is me pretending it works *)
+            raise TypeError "Umm it exists" 
+
+        end
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"
       (* special kind of substitution, instantiate (FORALL) *)
       (* TYAPPLY of exp * tyex list *)

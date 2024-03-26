@@ -1931,16 +1931,15 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           in
             typeof (LETX (LET, bs, body), Delta, GammaModified)
           end
-      | ty (LETRECX (bs, body)) = raise LeftAsExercise "UH"
-        (* let
-          val (xs, es) = ListPair.unzip (bs)
-          val eTypes = map ty es
-          val eTypes = map (fn ty => asType(ty, Delta)) eTypes
-          val GammaModified = bindList (xs, eTypes, Gamma)
-          val eType = typeof (body, Delta, GammaModified)
-        in
-          eType
-        end *)
+      | ty (LETRECX (bs, body)) = 
+          let
+            val (xs, es) = ListPair.unzip (bs)
+            val eTypes = map ty es
+            val eTypes = map (fn ty => asType(ty, Delta)) eTypes
+            val eType = typeof (body, Delta, Gamma)
+          in
+            eType
+          end
       | ty (LAMBDA (formals, body)) = 
         let
           val (formalNames, formalTys) = ListPair.unzip (formals)

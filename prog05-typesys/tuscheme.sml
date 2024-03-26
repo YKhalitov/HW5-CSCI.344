@@ -1931,7 +1931,16 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           in
             typeof (LETX (LET, bs, body), Delta, GammaModified)
           end
-      | ty (LETRECX (bs, body)) = raise LeftAsExercise "LETRECX"
+      | ty (LETRECX (bs, body)) = raise LeftAsExercise "UH"
+        (* let
+          val (xs, es) = ListPair.unzip (bs)
+          val eTypes = map ty es
+          val eTypes = map (fn ty => asType(ty, Delta)) eTypes
+          val GammaModified = bindList (xs, eTypes, Gamma)
+          val eType = typeof (body, Delta, GammaModified)
+        in
+          eType
+        end *)
       | ty (LAMBDA (formals, body)) = 
         let
           val (formalNames, formalTys) = ListPair.unzip (formals)
@@ -1955,9 +1964,22 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
           | _ => raise TypeError "Function isn't an actual function or maybe not well typed"
         end
 
-      | ty (TYLAMBDA (alphas, e)) = raise LeftAsExercise "TYLAMBDA"
+      | ty (TYLAMBDA (alphas, e)) =
       (* dont let any of the type variables we are writing down, exist, no dice. Otherwise throw into delta, recursively check, and put it back into. Adding into enviroment with kind star? *)
       (* TYLAMBDA of name list * exp *)
+        let
+          val freeVars = freetyvarsGamma Gamma 
+
+          (* val DeltaModified = bindList (alphas, ty e, Gamma)
+          val eTy = typeof (body, DeltaModified, Gamma) *)
+(* List.exists (fn freevar => List.exists (fn alpha => freevar = alpha) alphas) freeVars *)
+        in
+          if (List.exists (fn freevar => List.exists (fn alpha => freevar = alpha) alphas) freeVars) then 
+            raise TypeError "Umm it exists" 
+          else 
+            raise LeftAsExercise "TyLAmpba"
+
+        end
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"
       (* special kind of substitution, instantiate (FORALL) *)
       (* TYAPPLY of exp * tyex list *)
@@ -1979,15 +2001,26 @@ fun typdef (d: def, Delta: kind env, Gamma: tyex env) : tyex env * string =
         in (bind (name, tau, Gamma), typeString tau)
         end
   | EXP e => typdef (VAL ("it", e), Delta, Gamma)
-  | DEFINE (name, tau, lambda as (formals, body)) => raise LeftAsExercise "DEFINE"
-      (* let
-        val (fnames, ftys) = ListPair.unzip formals
-        val def's_type = FUNTY (ftys, returns)
-        val functions' = bind (f, def's_type, functions)
-      in
-
-      end *)
-  | VALREC (name, tau, e) => raise LeftAsExercise "VALREC"
+  | DEFINE (name, tau, lambda as (formals, body)) => 
+    let
+      val (formalNames, formalTys) = ListPair.unzip (formals)
+    in
+      typdef (VALREC (name, FUNTY(formalTys, tau), LAMBDA (formals, body)), Delta, Gamma)
+    end
+  | VALREC (name, tau, e) =>  (* val eType = typeof (e, Delta, Gamma) val eType = asType(eType, Delta) val tau = typeof (e, Delta, Gamma) *)
+    let
+      val tau = asType(tau, Delta)
+      val GammaModified = bind (name, tau, Gamma)
+    in
+      case e of
+        LAMBDA(formals, body) => (GammaModified, typeString tau)
+          (* let
+            val (formalNames, formalTys) = ListPair.unzip (formals)
+          in
+            (GammaModified, typeString tau)
+          end *)
+      | _ => raise TypeError "E is not of form lambda"
+    end
 (* type declarations for consistency checking *)
 val _ = op typdef : def * kind env * tyex env -> tyex env * string
 

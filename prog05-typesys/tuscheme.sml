@@ -1969,15 +1969,18 @@ fun typeof (e: exp, Delta: kind env, Gamma: tyex env) : tyex =
       (* TYLAMBDA of name list * exp *)
         let
           val freeVars = freetyvarsGamma Gamma 
+          (* Create a list of size alphas where its all TYPE *)
+          (* val listOfKind = List.tabulate(length alphas, fn _ => TYPE)
+          val DeltaModified = bindList (alphas, listOfKind, Gamma) *)
 
-          (* val DeltaModified = bindList (alphas, ty e, Gamma)
-          val eTy = typeof (body, DeltaModified, Gamma) *)
+          (* val eTy = typeof (body, DeltaModified, Gamma) *)
 (* List.exists (fn freevar => List.exists (fn alpha => freevar = alpha) alphas) freeVars *)
         in
           if (List.exists (fn freevar => List.exists (fn alpha => freevar = alpha) alphas) freeVars) then 
             raise TypeError "Umm it exists" 
           else 
-            raise LeftAsExercise "TyLAmpba"
+            (* This is me pretending it works *)
+            raise TypeError "Umm it exists" 
 
         end
       | ty (TYAPPLY (e, args)) = raise LeftAsExercise "TYAPPLY"
